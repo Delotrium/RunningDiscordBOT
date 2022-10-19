@@ -10,7 +10,7 @@ async def load(ctx, extension):
     client.load_extension(f"src.{extension}")
 
 @client.command()
-async def   unload(ctx, extension):
+async def unload(ctx, extension):
     client.unload_extension(f"src.{extension}")
 
 for filename in os.listdir('./src'):
