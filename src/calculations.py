@@ -3,11 +3,60 @@ from discord.ext import commands
 
 
 class Calculator(commands.Cog):
+    
     def __init__(self, client):
         self.client = client
+        
+    ###
+    #
+    # Takes two values: kilometers and minutes
+    #
+    ###
+    @commands.command(aliases=["calculate.pace"])
+    async def pace(self, ctx, *, parms):
+        try:
+            values = parms.split(" ")
+            
+            if len(values) < 2:
+                await ctx.send ("Pace requires two values for calculation: kilometers and minutes")
+            else:
+                print (float(values[0]))
+                distance = float(values[0])
+                time = float(values[1])
+
+                pace = time / distance
+                paceMiles = time / (distance * .62137)
+
+                em = discord.Embed()
+
+                # Format the EMBED
+                c = discord.Color(0)
+                em.set_author(name=ctx.message.author.display_name + " has requested a pace check.")
+
+                em.title = "Pace Calculation"
+                em.colour = c.orange()
+
+                em.description = "Distance: " + str(distance) + " km\nTime: " + str(time) + " minutes\nPace (km): " + str(pace) + " minutes/km\nPace (m): " + str(round(paceMiles,1)) + " minutes/mile"
+
+                await ctx.send(embed=em)
+            
+        except Exception as e:
+            print ("An error occured: " + e)
 
     @commands.command(aliases=["convert.distance"])
     async def distance(self, ctx, *, query):
+        
+        # Set both as empty string types
+        number = ""
+        unit = ""
+
+        # Parse the query and break out the unit of measure from the numeric value
+        for letter in query:
+            if letter.isnumeric():
+                number = number + letter
+            else:
+                unit = unit + letter
+
         if query.lower().__contains__("km"):
             amount = float(query[:-2])
             miles = round(amount * 0.6214, 3)
