@@ -32,6 +32,9 @@ class Fun(commands.Cog):
                    'Very doubtful']
         await ctx.send(f"{ctx.author.mention} asked: {question}\n My reply is: {answers[random.randint(0, len(answers)-1)]}")
 
+    @eightball.error
+    async def eightball_error(self, ctx, error):
+        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!8ball <question>``. Command aliases are ``r!8ball``, ``r!8b``, and ``r!eightball``. For any issues please contact support! ")
 
     @commands.command(aliases=['kill', 'hunt'])
     async def shoot(self, ctx, member : discord.Member):
@@ -47,9 +50,19 @@ class Fun(commands.Cog):
                    f'{ctx.author.mention} chose kick! It was highly effective! {member.mention} is now half HP!']
         await ctx.send(replies[random.randint(0, 9)])
 
+    @shoot.error
+    async def shoot_error(self, ctx, error):
+        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!kill <@user>``. Command aliases are ``r!kill``, and ``r!hunt``. For any issues please contact support! ")
+
+
     @commands.command()
     async def chance(self, ctx, *, query):
         await ctx.send(f"{ctx.author.mention}, there is a {random.randint(1, 100)}% chance that {query}!")
+
+    @chance.error
+    async def chance_error(self, ctx, error):
+        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!chance <query>``. For any issues please contact support! ")
+
 
     @commands.command()
     async def guessnumber(self, ctx, *, setting="normal"):
@@ -78,6 +91,11 @@ class Fun(commands.Cog):
             elif msg.content == 'exit' or 'close':
                 await ctx.send(f'Oh, goodbye then {ctx.author.mention}...')
                 break
+
+    @guessnumber.error
+    async def guessnumber_error(self, ctx, error):
+        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!guessnumber <setting>``.  Available settings are: ``easy`` [1-5], ``normal`` [1-10](default), ``hard`` [1-20], and ``impossible`` [1-35]. For any issues please contact support! ")
+
 
     @commands.command(aliases=["rps"])
     async def rockpaperscissors(self, ctx):
@@ -109,6 +127,11 @@ class Fun(commands.Cog):
         elif (computer == 'scissors') and (msg.content =='paper'):
             await ctx.send(f'Damn I just cut you up like surgery, nighty night {ctx.author.mention}.')
 
+    @rockpaperscissors.error
+    async def rockpaperscissors_error(self, ctx, error):
+        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!rockpaperscissors``.  Available aliases are ``r!rps``. For any issues please contact support! ")
+
+
     @commands.command(aliases=["roll"])
     async def dice(self, ctx):
         dicerolle = random.randint(1, 6)
@@ -129,6 +152,9 @@ class Fun(commands.Cog):
         embed.set_image(url=imgurl)
         await ctx.send(embed=embed)
 
+    @dice.error
+    async def dice_error(self, ctx, error):
+        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!dice``.  Available aliases are ``r!roll``. For any issues please contact support! ")
         
 
 def setup(client):
