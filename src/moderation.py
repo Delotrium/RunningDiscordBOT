@@ -24,7 +24,7 @@ class Moderation(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
-    async def bad(self, ctx, member :discord.Member, *, reason=None):
+    async def ban(self, ctx, member :discord.Member, *, reason=None):
         await member.ban(reason=reason)
         await ctx.send(f'{member} was just banned for "{reason}"!')
 
