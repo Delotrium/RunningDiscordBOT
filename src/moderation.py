@@ -28,6 +28,6 @@ class Moderation(commands.Cog):
         await member.ban(reason=reason)
         await ctx.send(f'{member} was just banned for "{reason}"!')
 
-def setup(client):
-    client.add_cog(Moderation(client))
+async def setup(client):
+    await client.add_cog(Moderation(client))
     

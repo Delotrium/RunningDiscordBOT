@@ -14,5 +14,5 @@ class Development(commands.Cog):
     async def ping(self, ctx):
         await ctx.send(f'Pong {ctx.author.mention}!')
 
-def setup(client):
-    client.add_cog(Development(client))
+async def setup(client):
+    await client.add_cog(Development(client))

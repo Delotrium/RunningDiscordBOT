@@ -57,5 +57,5 @@ class Calculator(commands.Cog):
             nm = round(amount / 2025.37183,3)
             await ctx.send(f"Conversions for {ctx.author.mention}:\n{query} can be converted to the following (3dp):\nKilometres = {km}km\nFeet = {ft}ft\nMiles = {mi}mi\nMetres = {m}m\nNautical Miles = {nm}nm")
 
-def setup(client):
-    client.add_cog(Calculator(client))
+async def setup(client):
+    await client.add_cog(Calculator(client))

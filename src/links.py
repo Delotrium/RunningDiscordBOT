@@ -13,5 +13,5 @@ class Link(commands.Cog):
     async def link(self, ctx, *, query):
         await ctx.send(f'{ctx.author.mention}: https://{query}.com')
 
-def setup(client):
-    client.add_cog(Link(client))
+async def setup(client):
+    await client.add_cog(Link(client))

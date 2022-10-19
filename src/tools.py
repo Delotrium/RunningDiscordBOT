@@ -10,6 +10,6 @@ class Tools(commands.Cog):
         await member.send(message + f"\n ``From {ctx.author}``")
         Author = ctx.author
         await Author.send("\""+ message + f"\" was sent to {member}!")
-
-def setup(client):
-    client.add_cog(Tools(client))
+        
+async def setup(client):
+    await client.add_cog(Tools(client))

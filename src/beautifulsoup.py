@@ -33,5 +33,5 @@ class Soup(commands.Cog):
             await ctx.send(f"{ctx.author.mention}:\n We could not find \"{query}\" in the dictionary!")
 
 
-def setup(client):
-    client.add_cog(Soup(client))
+async def setup(client):
+    await client.add_cog(Soup(client))
