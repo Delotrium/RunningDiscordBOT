@@ -7,7 +7,7 @@ class Soup(commands.Cog):
     def __init__(self, client):
         self.client = client
 
-    @commands.command(aliases=["define.urban", 'urban', 'search.urban', 'uban.dictionary'])
+    @commands.command(aliases=["define.urban", 'urban', 'search.urban', 'urban.dictionary'])
     async def define_urban(self, ctx, *, query):
         url = f"https://www.urbandictionary.com/define.php?term={query}"
         
