@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import math
 
 
 class Calculator(commands.Cog):
@@ -105,6 +106,38 @@ class Calculator(commands.Cog):
             m = round(amount * 0.9144, 3)
             nm = round(amount / 2025.37183,3)
             await ctx.send(f"Conversions for {ctx.author.mention}:\n{query} can be converted to the following (3dp):\nKilometres = {km}km\nFeet = {ft}ft\nMiles = {mi}mi\nMetres = {m}m\nNautical Miles = {nm}nm")
+
+    @commands.command(aliases=["hr", "maxhr", "heartrate", "max_heartrate", "heartrate.max", "hr.max"])
+    async def max_hr(self, ctx, age, gender="male"):
+        age = float(age)
+        TankaMonahanSeals = 208 - (0.7 * age)
+        HaskellFox = 220-age
+        RobergsLandwehr = 205.8 - (0.685 * age)
+        if gender == "male" or gender == "men" or gender == "man":
+            Gellish = 203.7/(1+math.exp(0.033*(age-104.3)))
+        else:
+            Gellish = 190.2/(1+math.exp(0.0453*(age-107.5)))
+        LondereeMoeschberger = 206.3 -(0.711*age)
+        Miller = 217 - (0.85*age)
+        averageMaxHR = (TankaMonahanSeals + HaskellFox + Gellish + LondereeMoeschberger + Miller + RobergsLandwehr)/6
+        embed = discord.Embed()
+        colour = discord.Color.from_rgb(255, 0, 0)
+        embed.set_author(name="RunBOT Physiologist")
+        embed.title = "Max Heartrate Calculations"
+        embed.colour = colour
+        embed.description = "The list contains different maximum heart rate calculations and the averaging total of the calculations. "
+        embed.add_field(name='Tanka, Monahan, and Seals Approximation', value=f"``{round(TankaMonahanSeals, 2)}bpm``", inline=False)
+        embed.add_field(name='Haskell and Fox Approximation', value=f"``{round(HaskellFox, 2)}bpm``", inline=False)
+        embed.add_field(name='Robergs and Landwehr Approximation', value=f"``{round(RobergsLandwehr,2)}bpm``", inline=False)
+        embed.add_field(name='Gellish Approximation', value=f"``{round(Gellish,2)}bpm``", inline=False)
+        embed.add_field(name='Londeree and Moeschberger Approximation', value=f"``{round(LondereeMoeschberger,2)}bpm``", inline=False)
+        embed.add_field(name='Miller Approximation', value=f"``{round(Miller,2)}bpm``", inline=False)   
+        embed.add_field(name=f'The average maximum heart rate for a {age} year old:', value=f"``{round(averageMaxHR)}bpm``", inline=False)   
+        await ctx.send(f'{ctx.author.mention} - Heart Rate Calculations for a {age} year old {gender}\n', embed=embed) 
+    
+    @max_hr.error
+    async def max_hr_error(self, ctx, error):
+        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!max_hr <age> <optional: gender (male by default)>``. Aliases for this command are ``r!hr``, ``r!maxhr``, ``r!heartrate``, ``r!max_heartrate``, ``r!heartrate.max``, and ``hr.max``.")
 
 async def setup(client):
     await client.add_cog(Calculator(client))
