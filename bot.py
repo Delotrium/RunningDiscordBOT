@@ -1,13 +1,13 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import os
 import asyncio
-import logging
 
 
 intents = discord.Intents().all() 
 intents.message_content = True
 bot = commands.Bot(command_prefix='r!', intents=intents)
+
 
 
 @bot.command()
@@ -32,5 +32,9 @@ async def main():
         await bot.start('')
 discord.utils.setup_logging()
 
+@bot.event
+async def on_ready():
+    await bot.change_presence(activity=discord.Game('Bonking Simulator'))
 
 asyncio.run(main())
+
