@@ -2,8 +2,8 @@ import discord
 from discord.ext import commands
 
 class Development(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+    def __init__(self, bot):
+        self.bot = bot
 
 
     @commands.Cog.listener()
@@ -14,5 +14,5 @@ class Development(commands.Cog):
     async def ping(self, ctx):
         await ctx.send(f'Pong {ctx.author.mention}!')
 
-async def setup(client):
-    await client.add_cog(Development(client))
+async def setup(bot):
+    await bot.add_cog(Development(bot))
