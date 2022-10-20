@@ -125,7 +125,7 @@ class Calculator(commands.Cog):
         embed.set_author(name="RunBOT Physiologist")
         embed.title = "Max Heartrate Calculations"
         embed.colour = colour
-        embed.description = "The list contains different maximum heart rate calculations and the averaging total of the calculations. "
+        embed.description = "The list contains different maximum heart rate calculations and the averaging total of the calculations. NOTE; this is only a superficial mathematical calculation and may be greatly incorrect. These calculations are no replacement for laboratory calculations. "
         embed.add_field(name='Tanka, Monahan, and Seals Approximation', value=f"``{round(TankaMonahanSeals, 2)}bpm``", inline=False)
         embed.add_field(name='Haskell and Fox Approximation', value=f"``{round(HaskellFox, 2)}bpm``", inline=False)
         embed.add_field(name='Robergs and Landwehr Approximation', value=f"``{round(RobergsLandwehr,2)}bpm``", inline=False)
@@ -137,7 +137,7 @@ class Calculator(commands.Cog):
     
     @max_hr.error
     async def max_hr_error(self, ctx, error):
-        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!max_hr <age> <optional: gender (male by default)>``. Aliases for this command are ``r!hr``, ``r!maxhr``, ``r!heartrate``, ``r!max_heartrate``, ``r!heartrate.max``, and ``hr.max``.")
+        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!max_hr <age> <optional: gender (male by default)>``. Aliases for this command are ``r!hr``, ``r!maxhr``, ``r!heartrate``, ``r!max_heartrate``, ``r!heartrate.max``, and ``r!hr.max``.")
 
 async def setup(client):
     await client.add_cog(Calculator(client))
