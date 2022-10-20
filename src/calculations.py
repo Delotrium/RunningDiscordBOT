@@ -106,6 +106,13 @@ class Calculator(commands.Cog):
             m = round(amount * 0.9144, 3)
             nm = round(amount / 2025.37183,3)
             await ctx.send(f"Conversions for {ctx.author.mention}:\n{query} can be converted to the following (3dp):\nKilometres = {km}km\nFeet = {ft}ft\nMiles = {mi}mi\nMetres = {m}m\nNautical Miles = {nm}nm")
+        else:
+            await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!distance <distance with unit>``. Available units are yards ``yrd``,metres ``m``, nautical miles ``nm``, feet ``ft``, miles ``mi`` and, kilometres ``km``. Example calculation: ``100km``.")
+
+    @distance.error
+    async def distance_error(self, ctx, error):
+        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!distance <distance with unit>``. Available units are yards ``yrd``,metres ``m``, nautical miles ``nm``, feet ``ft``, miles ``mi`` and, kilometres ``km``. Example calculation: ``100km``.")
+           
 
     @commands.command(aliases=["hr", "maxhr", "heartrate", "max_heartrate", "heartrate.max", "hr.max"])
     async def max_hr(self, ctx, age, gender="male"):
