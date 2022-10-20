@@ -1,18 +1,19 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 class Development(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, client):
+        self.client = client
 
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print("The BOT is online! ")
+        print('Connected to bot')
+
 
     @commands.command()
     async def ping(self, ctx):
         await ctx.send(f'Pong {ctx.author.mention}!')
 
-async def setup(bot):
-    await bot.add_cog(Development(bot))
+async def setup(client):
+    await client.add_cog(Development(client))
