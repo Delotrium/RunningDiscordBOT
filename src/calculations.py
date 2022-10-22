@@ -1,9 +1,11 @@
+from datetime import timedelta
 import discord
 from discord.ext import commands
 import math
 import pint
-
-from common.parsing import parse_quantity
+from src.common.fmt import fmt_delta
+from src.common.calc import pace, even_splits
+from src.common.parse import parse_quantity, parse_time_to_timedelta
 
 
 class Calculator(commands.Cog):
@@ -21,43 +23,29 @@ class Calculator(commands.Cog):
     async def pace(self, ctx, *, parms):
         try:
             tokens = parms.split()
-            if len(tokens) not in (2, 3):
+            if len(tokens) != 2:
                 await ctx.send (
                     "Expected 2 or 3 arguments, distance, time and optional unit.\n"
                     "Ex:\n"
                     "\t- r!pace 10km 50min"
                     "\t- r!pace 10km 50min min/mile"
                 )
+                return
+
             distance = parse_quantity(tokens[0], pint.Unit('km'))
-            time = parse_quantity(tokens[1], pint.Unit('minutes'))
-            output_unit = pint.Unit(tokens[2]) if len(tokens) == 3 else distance.u
-
-            pace: pint.Quantity = distance / time
-
-            pace.convert
-            
-            # values = parms.split(" ")
-            
-            # if len(values) < 2:
-            #     await ctx.send ("Pace requires two values for calculation: kilometers and minutes")
-            # else:
-            #     print (float(values[0]))
-            #     distance = float(values[0])
-            #     time = float(values[1])
-
-            #     pace = time / distance
-            #     paceMiles = time / (distance * .62137)
-
-
-                # Format the EMBED
+            time = parse_time_to_timedelta(tokens[1])
+            computed_pace = pace(distance, time)
+            km_pace = timedelta(seconds=computed_pace.to('sec/km').m)
+            mile_pace = timedelta(seconds=computed_pace.to('sec/mile').m)
+       
             em = discord.Embed()
-            c = discord.Color(0)
             em.set_author(name=ctx.message.author.display_name + " has requested a pace check.")
-
             em.title = "Pace Calculation"
-            em.colour = c.orange()
-
-            em.description = "Distance: " + str(distance) + " km\nTime: " + str(time) + " minutes\nPace (km): " + str(pace) + " minutes/km\nPace (m): " + str(round(paceMiles,1)) + " minutes/mile"
+            em.colour = discord.Color(0).orange()
+            em.description = (
+                f"Pace needed to run {distance} in {time}:\n"
+                f"\t{fmt_delta(km_pace)}/km, {fmt_delta(mile_pace)}/mi"
+            )
 
             await ctx.send(embed=em)
             
