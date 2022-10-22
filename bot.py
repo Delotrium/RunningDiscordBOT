@@ -26,10 +26,10 @@ async def load_extensions():
 
 
 async def main():
-    
+    secret_token = os.environ.get('BOT_TOKEN', '')
     async with bot:
         await load_extensions()
-        await bot.start('')
+        await bot.start(secret_token)
 discord.utils.setup_logging()
 
 @bot.event
