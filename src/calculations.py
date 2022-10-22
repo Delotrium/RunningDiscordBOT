@@ -1,6 +1,9 @@
 import discord
 from discord.ext import commands
 import math
+import pint
+
+from common.parsing import parse_quantity
 
 
 class Calculator(commands.Cog):
@@ -8,38 +11,55 @@ class Calculator(commands.Cog):
     def __init__(self, client):
         self.client = client
         
-    ###
-    #
-    # Takes two values: kilometers and minutes
-    #
-    ###
+    """
+    Usage:
+            r!pace distance time [output unit]
+        ex:
+            r!pace 10km 50:00min [miles]
+    """
     @commands.command(aliases=["calculate.pace"])
     async def pace(self, ctx, *, parms):
         try:
-            values = parms.split(" ")
+            tokens = parms.split()
+            if len(tokens) not in (2, 3):
+                await ctx.send (
+                    "Expected 2 or 3 arguments, distance, time and optional unit.\n"
+                    "Ex:\n"
+                    "\t- r!pace 10km 50min"
+                    "\t- r!pace 10km 50min min/mile"
+                )
+            distance = parse_quantity(tokens[0], pint.Unit('km'))
+            time = parse_quantity(tokens[1], pint.Unit('minutes'))
+            output_unit = pint.Unit(tokens[2]) if len(tokens) == 3 else distance.u
+
+            pace: pint.Quantity = distance / time
+
+            pace.convert
             
-            if len(values) < 2:
-                await ctx.send ("Pace requires two values for calculation: kilometers and minutes")
-            else:
-                print (float(values[0]))
-                distance = float(values[0])
-                time = float(values[1])
+            # values = parms.split(" ")
+            
+            # if len(values) < 2:
+            #     await ctx.send ("Pace requires two values for calculation: kilometers and minutes")
+            # else:
+            #     print (float(values[0]))
+            #     distance = float(values[0])
+            #     time = float(values[1])
 
-                pace = time / distance
-                paceMiles = time / (distance * .62137)
+            #     pace = time / distance
+            #     paceMiles = time / (distance * .62137)
 
-                em = discord.Embed()
 
                 # Format the EMBED
-                c = discord.Color(0)
-                em.set_author(name=ctx.message.author.display_name + " has requested a pace check.")
+            em = discord.Embed()
+            c = discord.Color(0)
+            em.set_author(name=ctx.message.author.display_name + " has requested a pace check.")
 
-                em.title = "Pace Calculation"
-                em.colour = c.orange()
+            em.title = "Pace Calculation"
+            em.colour = c.orange()
 
-                em.description = "Distance: " + str(distance) + " km\nTime: " + str(time) + " minutes\nPace (km): " + str(pace) + " minutes/km\nPace (m): " + str(round(paceMiles,1)) + " minutes/mile"
+            em.description = "Distance: " + str(distance) + " km\nTime: " + str(time) + " minutes\nPace (km): " + str(pace) + " minutes/km\nPace (m): " + str(round(paceMiles,1)) + " minutes/mile"
 
-                await ctx.send(embed=em)
+            await ctx.send(embed=em)
             
         except Exception as e:
             print ("An error occured: " + e)
