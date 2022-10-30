@@ -67,5 +67,7 @@ def convert(qty: Q_) -> List[Quantity]:
         targets = ['min/km', 'min/mi', 'sec/meter']
     if qty.is_compatible_with('kph'):
         targets = ['miles/hour', 'kilometers/hour', 'meters/sec']
+    else:
+        return [qty.to(t) for t in qty.compatible_units()]
     
     return [qty.to(t) for t in targets]

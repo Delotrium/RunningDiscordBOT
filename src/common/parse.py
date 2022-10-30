@@ -48,7 +48,7 @@ def parse_time_to_timedelta(input_: str) -> timedelta:
 
     if len(parts) == 1:
         # can't decide if this should be minutes or seconds, but let's go minutes
-        return timedelta(minutes=parts[0])
+        return timedelta(minutes=int(parts[0]))
     if len(parts) == 2:
         # assume minutes:seconds e.g. 10:10 => 10 minutes and 10 seconds
         minutes, seconds = (int(p) for p in parts)

@@ -3,9 +3,9 @@ import discord
 from discord.ext import commands
 import math
 from src.common import Q_, U_
-from src.common.fmt import fmt_delta
+from src.common.fmt import fmt_delta, fmt_qty
 from src.common.calc import convert, pace, even_splits
-from src.common.parse import parse_quantity, parse_time_to_timedelta
+from src.common.parse import parse_quantity, parse_time_to_seconds, parse_time_to_timedelta
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,6 +14,35 @@ class Calculator(commands.Cog):
     
     def __init__(self, client):
         self.client = client
+
+    @commands.command(aliases=["splits", "split"])
+    async def compute_splits(self, ctx, *, qry):
+        """ Like pace, but produces splits
+        Ussage:
+            r!splits time distance [unit]
+        """
+        try:
+            tokens = qry.split()
+            if len(tokens) not in (2, 3):
+                pass
+            unit = 'mile' if len(tokens) == 3 and tokens[2].startswith('mi') else 'km'
+            distance = parse_quantity(tokens[1], U_('km'))
+            time = parse_time_to_timedelta(tokens[0])
+            logger.info(f"time {time}, distance {distance}, unit {unit}")
+            splits = even_splits(distance, time, unit)
+            em = discord.Embed(
+                title=f"{unit.capitalize()} splits for {tokens[0]} {tokens[1]}",
+                colour=discord.Color(0).blurple()
+            )
+            if len(splits) > 25:
+                em.description = "\n".join(str(split) for split in splits)
+            else:
+                for split in splits:
+                    em.add_field(name=split.index +1, value=str(split), inline=True)
+
+            await ctx.send(embed=em)
+        except:
+            logger.exception("Uh oh")
         
 
     @commands.command(aliases=["calculate.pace"])
@@ -31,7 +60,7 @@ class Calculator(commands.Cog):
                     "Expected 2 or 3 arguments, distance, time and optional unit.\n"
                     "Ex:\n"
                     "\t- r!pace 10km 50min"
-                    "\t- r!pace 10km 50min min/mile"
+                    "\t- r!pace 10km 50min"
                 )
                 return
 
@@ -43,7 +72,7 @@ class Calculator(commands.Cog):
        
             em = discord.Embed(
                 title=f"Pace calculation for {ctx.message.author.display_name}",
-                colour=discord.Color(0).orange()
+                colour=discord.Color(0).blurple()
             )
             em.add_field(name="Distance", value=distance)
             em.add_field(name="Time", value=time)
@@ -58,19 +87,24 @@ class Calculator(commands.Cog):
     @commands.command(aliases=["con"])
     async def convert(self, ctx, *, query):
         try:
+            logger.info(query)
             qty = parse_quantity(query)
 
-            if not qty:
+            if qty is None:
                 await ctx.send(f"Unrecognized unit {query}")
             conversions = convert(qty)
             
             em = discord.Embed(
-                title=f"Conversions for {qty}",
-                colour=discord.Colour.blurple,
+                title=f'Conversions for "{query}"',
+                colour=discord.Colour.blurple(),
             )
 
             for converted in conversions:
-                em.add_field(name=converted.u, value=converted, inline=False)
+                
+                em.add_field(
+                    name=converted.u, 
+                    value=fmt_qty(converted), inline=False,
+                )
             
             await ctx.send(embed=em)
         except:
