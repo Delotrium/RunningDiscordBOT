@@ -1,118 +1,118 @@
+from datetime import timedelta
 import discord
 from discord.ext import commands
 import math
+from src.common import Q_, U_
+from src.common.fmt import fmt_delta, fmt_qty
+from src.common.calc import convert, pace, even_splits
+from src.common.parse import parse_quantity, parse_time_to_seconds, parse_time_to_timedelta
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Calculator(commands.Cog):
     
     def __init__(self, client):
         self.client = client
+
+    @commands.command(aliases=["splits", "split"])
+    async def compute_splits(self, ctx, *, qry):
+        """ Like pace, but produces splits
+        Ussage:
+            r!splits time distance [unit]
+        """
+        try:
+            tokens = qry.split()
+            if len(tokens) not in (2, 3):
+                pass
+            unit = 'mile' if len(tokens) == 3 and tokens[2].startswith('mi') else 'km'
+            distance = parse_quantity(tokens[1], U_('km'))
+            time = parse_time_to_timedelta(tokens[0])
+            logger.info(f"time {time}, distance {distance}, unit {unit}")
+            splits = even_splits(distance, time, unit)
+            em = discord.Embed(
+                title=f"{unit.capitalize()} splits for {tokens[0]} {tokens[1]}",
+                colour=discord.Color(0).blurple()
+            )
+            if len(splits) > 25:
+                em.description = "\n".join(str(split) for split in splits)
+            else:
+                for split in splits:
+                    em.add_field(name=split.index +1, value=str(split), inline=True)
+
+            await ctx.send(embed=em)
+        except Exception:
+            logger.exception("Uh oh")
         
-    ###
-    #
-    # Takes two values: kilometers and minutes
-    #
-    ###
+
     @commands.command(aliases=["calculate.pace"])
     async def pace(self, ctx, *, parms):
+        """
+        Usage:
+                r!pace distance time
+            ex:
+                r!pace 10km 50:00min
+        """
         try:
-            values = parms.split(" ")
-            
-            if len(values) < 2:
-                await ctx.send ("Pace requires two values for calculation: kilometers and minutes")
-            else:
-                print (float(values[0]))
-                distance = float(values[0])
-                time = float(values[1])
+            tokens = parms.split()
+            if len(tokens) != 2:
+                await ctx.send (
+                    "Expected 2 or 3 arguments, distance, time and optional unit.\n"
+                    "Ex:\n"
+                    "\t- r!pace 10km 50min"
+                    "\t- r!pace 10km 50min"
+                )
+                return
 
-                pace = time / distance
-                paceMiles = time / (distance * .62137)
+            distance = parse_quantity(tokens[0], U_('km'))
+            time = parse_time_to_timedelta(tokens[1])
+            computed_pace = pace(distance, time)
+            km_pace = timedelta(seconds=computed_pace.to('sec/km').m)
+            mile_pace = timedelta(seconds=computed_pace.to('sec/mile').m)
+       
+            em = discord.Embed(
+                title=f"Pace calculation for {ctx.message.author.display_name}",
+                colour=discord.Color(0).blurple()
+            )
+            em.add_field(name="Distance", value=distance)
+            em.add_field(name="Time", value=time)
+            em.add_field(name="Pace (km)", value=fmt_delta(km_pace))
+            em.add_field(name="Pace (mi)", value=fmt_delta(mile_pace))
 
-                em = discord.Embed()
-
-                # Format the EMBED
-                c = discord.Color(0)
-                em.set_author(name=ctx.message.author.display_name + " has requested a pace check.")
-
-                em.title = "Pace Calculation"
-                em.colour = c.orange()
-
-                em.description = "Distance: " + str(distance) + " km\nTime: " + str(time) + " minutes\nPace (km): " + str(pace) + " minutes/km\nPace (m): " + str(round(paceMiles,1)) + " minutes/mile"
-
-                await ctx.send(embed=em)
+            await ctx.send(embed=em)
             
         except Exception as e:
             print ("An error occured: " + e)
 
-    @commands.command(aliases=["convert.distance"])
-    async def distance(self, ctx, *, query):
-        
-        # Set both as empty string types
-        number = ""
-        unit = ""
+    @commands.command(aliases=["con"])
+    async def convert(self, ctx, *, query):
+        try:
+            logger.info(query)
+            qty = parse_quantity(query)
 
-        # Parse the query and break out the unit of measure from the numeric value
-        for letter in query:
-            if letter.isnumeric():
-                number = number + letter
-            else:
-                unit = unit + letter
+            if qty is None:
+                await ctx.send(f"Unrecognized unit {query}")
+            conversions = convert(qty)
+            
+            em = discord.Embed(
+                title=f'Conversions for "{query}"',
+                colour=discord.Colour.blurple(),
+            )
 
-        if query.lower().__contains__("km"):
-            amount = float(query[:-2])
-            miles = round(amount * 0.6214, 3)
-            metres = round(amount*1000,3) 
-            ft = round(amount * 3280.8399,3)
-            nm = round(amount * 0.5399568,3)
-            yrd = round(amount * 1093.6133,3)
-            await ctx.send(f"Conversions for {ctx.author.mention}:\n{query} can be converted to the following (3dp):\nMiles = {miles}mi\nMetres = {metres}m\nFeet = {ft}ft\nNautical Miles = {nm}nm\nYards = {yrd}yrd")
-        elif query.lower().__contains__("mi"):
-            amount = float(query[:-2])
-            km = round(amount * 1.6093, 3)
-            metres = round(amount*1609.344,3) 
-            ft = round(amount * 5280,3)
-            nm = round(amount * 0.869,3)
-            yrd = round(amount * 1760,3)
-            await ctx.send(f"Conversions for {ctx.author.mention}:\n{query} can be converted to the following (3dp):\nKilometres = {km}km\nMetres = {metres}m\nFeet = {ft}ft\nNautical Miles = {nm}nm\nYards = {yrd}yrd")
-        elif query.lower().__contains__("ft"):
-            amount = float(query[:-2])
-            km = round(amount /3280.8399, 3)
-            metres = round(amount/3.2808399,3) 
-            mi = round(amount /5280,3)
-            nm = round(amount / 6076.11549,3)
-            yrd = round(amount /3,3)
-            await ctx.send(f"Conversions for {ctx.author.mention}:\n{query} can be converted to the following (3dp):\nKilometres = {km}km\nMetres = {metres}m\nMiles = {mi}mi\nNautical Miles = {nm}nm\nYards = {yrd}yrd")
-        elif query.lower().__contains__("m") and not query.lower().__contains__("nm"):
-            amount = float(query[:-1])
-            km = round(amount /1000, 3)
-            ft = round(amount*3.2808399, 3) 
-            mi = round(amount /1609.344, 3)
-            nm = round(amount / 1852,3)
-            yrd = round(amount * 1.0936133,3)
-            await ctx.send(f"Conversions for {ctx.author.mention}:\n{query} can be converted to the following (3dp):\nKilometres = {km}km\nFeet = {ft}ft\nMiles = {mi}mi\nNautical Miles = {nm}nm\nYards = {yrd}yrd")
-        elif query.lower().__contains__("nm"):
-            amount = float(query[:-2])
-            km = round(amount *1.852, 3)
-            ft = round(amount*6076.11549, 3) 
-            mi = round(amount *1.15077945, 3)
-            m = round(amount * 1852, 3)
-            yrd = round(amount * 2025.3718,3)
-            await ctx.send(f"Conversions for {ctx.author.mention}:\n{query} can be converted to the following (3dp):\nKilometres = {km}km\nFeet = {ft}ft\nMiles = {mi}mi\nMetres = {m}m\nYards = {yrd}yrd")
-        elif query.lower().__contains__("yrd"):
-            amount = float(query[:-3])
-            km = round(amount /1093.6133, 3)
-            ft = round(amount*3, 3) 
-            mi = round(amount / 1760, 3)
-            m = round(amount * 0.9144, 3)
-            nm = round(amount / 2025.37183,3)
-            await ctx.send(f"Conversions for {ctx.author.mention}:\n{query} can be converted to the following (3dp):\nKilometres = {km}km\nFeet = {ft}ft\nMiles = {mi}mi\nMetres = {m}m\nNautical Miles = {nm}nm")
-        else:
-            await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!distance <distance with unit>``. Available units are yards ``yrd``,metres ``m``, nautical miles ``nm``, feet ``ft``, miles ``mi`` and, kilometres ``km``. Example calculation: ``100km``.")
+            for converted in conversions:
+                
+                em.add_field(
+                    name=converted.u, 
+                    value=fmt_qty(converted), inline=False,
+                )
+            
+            await ctx.send(embed=em)
+        except Exception:
+            logger.exception("Error performing conversions")
 
-    @distance.error
-    async def distance_error(self, ctx, error):
-        await ctx.send(f"{ctx.author.mention} invalid command! To use this command use ``r!distance <distance with unit>``. Available units are yards ``yrd``,metres ``m``, nautical miles ``nm``, feet ``ft``, miles ``mi`` and, kilometres ``km``. Example calculation: ``100km``.")
-           
+    @convert.error
+    async def convert_error(self, ctx, error):
+        await ctx.send(f"Unrecognized unit")
 
     @commands.command(aliases=["hr", "maxhr", "heartrate", "max_heartrate", "heartrate.max", "hr.max"])
     async def max_hr(self, ctx, age, gender="male"):
