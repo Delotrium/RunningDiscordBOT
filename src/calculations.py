@@ -41,7 +41,7 @@ class Calculator(commands.Cog):
                     em.add_field(name=split.index +1, value=str(split), inline=True)
 
             await ctx.send(embed=em)
-        except:
+        except Exception:
             logger.exception("Uh oh")
         
 
@@ -107,7 +107,7 @@ class Calculator(commands.Cog):
                 )
             
             await ctx.send(embed=em)
-        except:
+        except Exception:
             logger.exception("Error performing conversions")
 
     @convert.error
